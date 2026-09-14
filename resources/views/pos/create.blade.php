@@ -2,6 +2,7 @@
 @section('title', 'Kasir')
 @section('content')
     <h1 class="text-lg font-semibold mb-4">Transaksi Kasir</h1>
+  <!-- <h1 class="text-3xl text-red-600 font-semibold mb-4">Transaksi Kasir</h1> -->  
     <div class="grid grid-cols-3 gap-4">
         @foreach ($products as $product)
             <div class="border rounded-md p-3">
