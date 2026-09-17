@@ -2,98 +2,105 @@
 @section('title', 'Kasir')
 @section('content')
 
-<div class="container mx-auto px-4">
+<div class="container mx-auto px-4"> 
 
-    <h1 class="text-lg font-semibold mb-4">Transaksi Kasir</h1>
+```
+<h1 class="text-lg font-semibold mb-4">Transaksi Kasir</h1> 
 
-    <div x-data="{
-        cart: [],
+<div x-data="{ 
+    cart: [], 
+    selectedProduct: null,
 
-        addToCart(id, name, price) {
-            this.cart.push({
-                id,
-                name,
-                price,
-                uniqueId: Date.now()
-            });
-        },
+    addToCart(id, name, price) { 
+        this.cart.push({ 
+            id, 
+            name, 
+            price, 
+            uniqueId: Date.now() 
+        }); 
+    }, 
 
-        removeFromCart(targetId) {
-            this.cart = this.cart.filter(
-                item => item.uniqueId !== targetId
-            );
-        },
+    removeFromCart(targetId) { 
+        this.cart = this.cart.filter( 
+            item => item.uniqueId !== targetId 
+        ); 
+    }, 
 
-        subtotal() {
-            return this.cart.reduce(
-                (sum, item) => sum + item.price,
-                0
-            );
-        }
-    }">
+    subtotal() { 
+        return this.cart.reduce( 
+            (sum, item) => sum + item.price, 
+            0 
+        ); 
+    } 
+}"> 
 
-        <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-3 gap-4"> 
 
-            @foreach ($products as $product)
+        @foreach ($products as $product) 
 
-                <div
-                    class="border rounded-md p-3 cursor-pointer"
-                    @click="addToCart(
-                        {{ $product->id }},
-                        '{{ $product->name }}',
-                        {{ $product->price }}
-                    )"
-                >
+            <div 
+                class="border rounded-md p-3 cursor-pointer"
+                :class="{ 'ring-2 ring-blue-500': selectedProduct === {{ $product->id }} }"
+                @click="
+                    selectedProduct = {{ $product->id }};
+                    addToCart( 
+                        {{ $product->id }}, 
+                        '{{ $product->name }}', 
+                        {{ $product->price }} 
+                    )
+                " 
+            > 
 
-                    <p class="font-medium">
-                        {{ $product->name }}
-                    </p>
+                <p class="font-medium"> 
+                    {{ $product->name }} 
+                </p> 
 
-                    <p class="text-sm text-slate-500">
-                        Rp {{ number_format($product->price) }}
-                    </p>
+                <p class="text-sm text-slate-500"> 
+                    Rp {{ number_format($product->price) }} 
+                </p> 
 
-                    @if ($product->stock < 10)
-                        <span class="inline-block mt-2 bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded">
-                            Stok Menipis
-                        </span>
-                    @endif
+                @if ($product->stock < 10) 
+                    <span class="inline-block mt-2 bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded"> 
+                        Stok Menipis 
+                    </span> 
+                @endif 
 
-                </div>
+            </div> 
 
-            @endforeach
+        @endforeach 
 
-        </div>
+    </div> 
 
-        <div class="mt-4 border-t pt-3">
+    <div class="mt-4 border-t pt-3"> 
 
-            <template x-for="item in cart" :key="item.uniqueId">
+        <template x-for="item in cart" :key="item.uniqueId"> 
 
-                <div class="flex justify-between items-center mb-1">
+            <div class="flex justify-between items-center mb-1"> 
 
-                    <p x-text="item.name + ' - Rp ' + item.price"></p>
+                <p x-text="item.name + ' - Rp ' + item.price"></p> 
 
-                    <button
-                        type="button"
-                        @click="removeFromCart(item.uniqueId)"
-                        class="text-xs text-red-600 hover:underline font-semibold"
-                    >
-                        Hapus
-                    </button>
+                <button 
+                    type="button" 
+                    @click="removeFromCart(item.uniqueId)" 
+                    class="text-xs text-red-600 hover:underline font-semibold" 
+                > 
+                    Hapus 
+                </button> 
 
-                </div>
+            </div> 
 
-            </template>
+        </template> 
 
-            <p class="font-semibold mt-2">
-                Subtotal: Rp
-                <span x-text="subtotal()"></span>
-            </p>
+        <p class="font-semibold mt-2"> 
+            Subtotal: Rp 
+            <span x-text="subtotal()"></span> 
+        </p> 
 
-        </div>
+    </div> 
 
-    </div>
+</div> 
+```
 
-</div>
+</div> 
 
 @endsection
