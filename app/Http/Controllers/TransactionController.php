@@ -9,7 +9,7 @@ class TransactionController extends Controller
 {
     public function create()
     {
-        $products = Product::take(12)->get();
+        $products = Product::where('stock', '>', 0)->get(); //Mengambil seluruh produk yang stock-nya lebih besar dari 0
 
         return view('pos.create', ['products' => $products]);
     }
