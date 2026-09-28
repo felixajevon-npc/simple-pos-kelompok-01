@@ -4,8 +4,7 @@
 
 <div class="container mx-auto px-4"> 
 
-```
-<h1 class="text-lg font-semibold mb-4">Transaksi Kasir</h1> 
+    <h1 class="text-lg font-semibold mb-4">Transaksi Kasir</h1> 
 
 <div x-data="{ 
     cart: [], 
@@ -99,7 +98,6 @@
     </div> 
 
 </div> 
-```
 
 </div> 
 
