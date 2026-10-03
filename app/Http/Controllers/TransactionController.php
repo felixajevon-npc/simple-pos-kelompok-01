@@ -21,11 +21,13 @@ class TransactionController extends Controller
     }
 
     public function index()
-    {
-        $transactions = Transaction::latest()->paginate(15);
+{
+    $transactions = Transaction::with('details.product')
+        ->latest()
+        ->paginate(15);
 
-        return view('transactions.index', compact('transactions'));
-    }
+    return view('transactions.index', compact('transactions'));
+}
 
     public function show(string $id)
     {
