@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Transaction;
 use App\Models\Product;
 
 class TransactionController extends Controller
@@ -20,9 +21,13 @@ class TransactionController extends Controller
     }
 
     public function index()
-    {
-        return view('transaction.index');
-    }
+{
+    $transactions = Transaction::with('details.product')
+        ->latest()
+        ->paginate(15);
+
+    return view('transactions.index', compact('transactions'));
+}
 
     public function show(string $id)
     {
