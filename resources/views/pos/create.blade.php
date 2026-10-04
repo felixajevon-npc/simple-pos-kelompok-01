@@ -70,7 +70,11 @@
 
     </div> 
 
-    <div class="mt-4 border-t pt-3"> 
+    <div class="mt-4">
+        {{ $products->links() }}
+    </div>
+
+    <div class="mt-4 border-t pt-3">
 
         <template x-for="item in cart" :key="item.uniqueId"> 
 
