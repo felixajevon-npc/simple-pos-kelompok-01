@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Transaction;
 use App\Models\Product;
 
 class TransactionController extends Controller
 {
     public function create()
     {
-        $products = Product::where('stock', '>', 0)->get(); //Mengambil seluruh produk yang stock-nya lebih besar dari 0
+        $products = Product::where('stock', '>', 0)->get();
 
         return view('pos.create', ['products' => $products]);
     }
@@ -21,7 +22,11 @@ class TransactionController extends Controller
 
     public function index()
     {
-        return view('transaction.index');
+        $transactions = Transaction::with(['details.product', 'user'])
+            ->latest()
+            ->paginate(15);
+
+        return view('transactions.index', compact('transactions'));
     }
 
     public function show(string $id)

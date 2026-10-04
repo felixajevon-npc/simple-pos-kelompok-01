@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('title', 'Produk')
 
 @section('content')
@@ -14,7 +13,6 @@
             <th class="py-2 pr-4">Stok</th>
         </tr>
     </thead>
-
     <tbody>
         @foreach ($products as $product)
         <tr class="border-b">
