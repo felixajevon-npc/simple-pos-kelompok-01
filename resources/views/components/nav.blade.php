@@ -10,5 +10,8 @@
        class="hover:underline px-2 py-1 rounded {{ request()->routeIs('transactions.index') ? 'bg-slate-700' : '' }}">
         Transaksi
     </a>
-    <a href="{{ route('products.index') }}" class="hover:underline">Produk</a>
+    <a href="{{ route('products.index') }}"
+   class="hover:underline px-2 py-1 rounded {{ request()->routeIs('products.index') ? 'bg-slate-700' : '' }}">
+    Produk
+</a>
 </nav>
