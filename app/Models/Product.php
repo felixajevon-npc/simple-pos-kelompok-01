@@ -9,19 +9,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
+    protected $fillable = ['category_id', 'name', 'price', 'stock'];
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
-
 
     public function transactions(): BelongsToMany
     {
         return $this->belongsToMany(Transaction::class, 'transaction_details');
     }
 
-    public function details(): HasMany{
-        
+    public function details(): HasMany
+    {
         return $this->hasMany(TransactionDetail::class);
     }
 }
