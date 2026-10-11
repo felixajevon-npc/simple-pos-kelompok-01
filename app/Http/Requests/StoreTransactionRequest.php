@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-// use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTransactionRequest extends FormRequest
@@ -12,11 +12,6 @@ class StoreTransactionRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -24,5 +19,31 @@ class StoreTransactionRequest extends FormRequest
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.qty' => ['required', 'integer', 'min:1'],
         ];
+    }
+
+    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            $items = $this->input('items', []);
+
+            if (!is_array($items)) {
+                return;
+            }
+
+            foreach ($items as $item) {
+                if (empty($item['product_id']) || empty($item['qty'])) {
+                    continue;
+                }
+
+                $product = Product::find($item['product_id']);
+
+                if ($product && (int) $item['qty'] > $product->stock) {
+                    $validator->errors()->add(
+                        'items',
+                        "Stok untuk produk '{$product->name}' tidak mencukupi (Tersedia: {$product->stock}, Diminta: {$item['qty']})."
+                    );
+                }
+            }
+        });
     }
 }
