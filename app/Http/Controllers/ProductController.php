@@ -33,13 +33,19 @@ class ProductController extends Controller
             ->with('success', 'Produk berhasil ditambahkan.');
     }
 
-    public function edit(string $id)
-    {
-        return "Form edit produk #{$id} (belum dibuat)";
-    }
+   public function edit(Product $product)
+{
+    $categories = Category::orderBy('name')->get();
 
-    public function update(string $id)
-    {
-        return "Produk #{$id} diperbarui (belum ada logika penyimpanan)";
-    }
+    return view('products.edit', compact('product', 'categories'));
+}
+
+public function update(StoreProductRequest $request, Product $product)
+{
+    $product->update($request->validated());
+
+    return redirect()
+        ->route('products.index')
+        ->with('success', 'Produk berhasil diperbarui.');
+}
 }
