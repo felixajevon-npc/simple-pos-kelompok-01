@@ -1,59 +1,55 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Simple POS — Sistem Informasi Kasir
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Repositori ini merupakan proyek praktikum kelompok untuk mata kuliah **Pemrograman Web Lanjut (SIB245007)** pada Program Studi D-IV Sistem Informasi Bisnis, Jurusan Teknologi Informasi, Politeknik Negeri Malang.
 
-## About Laravel
+## Tim Pengembang (Kelompok 1 - SIB 3C)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Nama Mahasiswa | NIM |
+| :--- | :--- |
+| Desy Dwi Puspita | 244107060145 |
+| Felix Alberta Jevon | 244107060111 |
+| Meutia Arafah Hidayat | 244107060078 |
+| Najwa Kus Syafira | 244107060034 |
+| Sultan Syarif Ubaidillah A. N. | 244107060151 |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Ringkasan Pengembangan: Increment 6 (Validasi dan Keamanan Input)
 
-## Learning Laravel
+Pada *Increment 6*, pengembangan berfokus pada pengamanan *endpoint* aplikasi dari manipulasi data serta penerapan validasi input di sisi peladen (*server-side validation*) dengan cakupan sebagai berikut:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+1. **Perlindungan *Mass Assignment*:** Penerapan properti `$fillable` pada model `Product`, `Transaction`, dan `TransactionDetail` guna membatasi atribut basis data yang dapat diisi secara massal.
+2. **Validasi Berbasis *Form Request*:** Penggunaan kelas `StoreProductRequest` dan `StoreTransactionRequest` untuk memisahkan logika validasi dari *controller* serta memastikan integritas struktur data sebelum diproses lebih lanjut.
+3. **Validasi Ketersediaan Stok dan Penggabungan Kuantitas:** Penanganan duplikasi item pada keranjang kasir di sisi antarmuka serta validasi kecukupan stok produk terhadap jumlah pembelian yang diminta.
+4. **Kalkulasi Harga di Sisi Peladen (*Server-Side Calculation*):** Perhitungan nilai `subtotal` dan `total` transaksi secara langsung di sisi peladen menggunakan harga produk yang tersimpan di dalam basis data di dalam blok transaksi `DB::transaction()`.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Analisis Keamanan Input: Evaluasi Validasi `numeric` pada Atribut `total` dari Sisi Klien
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Rumusan Masalah
+> *Apabila atribut `total` tetap dikirimkan melalui formulir dari sisi klien dan divalidasi menggunakan aturan `numeric`, apakah mekanisme tersebut cukup untuk mencegah manipulasi nilai total transaksi? Mengapa demikian?*
 
-### Premium Partners
+### Analisis dan Pembahasan
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Pengiriman atribut `total` dari formulir di sisi klien (*client-side*) yang hanya disertai dengan aturan validasi `numeric` di sisi peladen **tidak cukup dan tidak aman** untuk mencegah manipulasi nilai transaksi.
 
-## Contributing
+Terdapat tiga alasan teknis utama yang mendasari hal tersebut:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. **Keterbatasan Cakupan Validasi Tipe Data (`numeric`)**
+   Aturan validasi `numeric` pada kerangka kerja Laravel hanya berfungsi untuk memverifikasi bahwa nilai yang diterima merupakan representasi angka yang valid secara sintaksis (contoh: `150000`, `0`, `1`, atau `-500`). Validasi ini hanya memeriksa tipe data, tetapi tidak memiliki kemampuan untuk memverifikasi kebenaran logika bisnis, yaitu apakah nilai angka tersebut benar-benar merupakan hasil akumulasi yang sah dari harga satuan produk dikalikan dengan kuantitas (`qty`) item yang dibeli.
 
-## Code of Conduct
+2. **Kerentanan Manipulasi Parameter di Sisi Klien (*Client-Side Parameter Tampering*)**
+   Dalam prinsip keamanan aplikasi web (*Zero Trust Client Input*), seluruh data yang berasal dari peramban pengguna tidak dapat dianggap tepercaya. Meskipun nilai `total` dihitung secara otomatis menggunakan JavaScript (Alpine.js) dan disimpan di dalam elemen `<input type="hidden" name="total">`, pengguna tetap memiliki kendali penuh atas permintaan HTTP yang dikirimkan. Pihak yang tidak bertanggung jawab dapat memodifikasi nilai tersebut sebelum *request* diproses oleh peladen melalui:
+   - **Perkakas Pengembang Peramban (*Browser Developer Tools*):** Mengubah nilai atribut `value` pada elemen HTML secara langsung sebelum menekan tombol kirim.
+   - **Aplikasi *Proxy* dan Klien HTTP (cURL, Postman, atau Burp Suite):** Mencegat (*intercept*) permintaan `POST /pos` dan memanipulasi muatan data (*payload*) menjadi nilai yang tidak semestinya (misalnya mengubah `total=72955` menjadi `total=1`).
+   
+   Apabila peladen hanya mengandalkan aturan `numeric`, nilai `1` tersebut akan tetap dinyatakan lolos validasi sehingga sistem akan mencatat transaksi yang merugikan secara finansial.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. **Ketidaksinkronan Data antara Klien dan Basis Data**
+   Harga yang tampil pada antarmuka pengguna dapat mengalami perbedaan dengan data terkini di basis data apabila terjadi pembaruan harga produk pada waktu yang bersamaan. Mengandalkan nilai perhitungan dari sisi klien berisiko menghasilkan pencatatan transaksi yang tidak akurat.
 
-## Security Vulnerabilities
+### Kesimpulan dan Implementasi Solusi
+Untuk menjamin integritas data finansial, aplikasi **tidak boleh** menerima input harga satuan maupun nilai `total` dari formulir sisi klien. Pada implementasi `TransactionController::store()`, formulir kasir hanya diizinkan mengirimkan identitas produk (`product_id`) dan jumlah pembelian (`qty`). 
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Selanjutnya, peladen secara mandiri mengambil harga resmi produk dari basis data (`Product::findOrFail($item['product_id'])`), menghitung ulang nilai `$subtotal = $product->price * $item['qty']`, serta mengakumulasikan nilai `$total` di dalam transaksi basis data (`DB::transaction()`). Pendekatan ini memastikan bahwa seluruh perhitungan harga sepenuhnya dikendalikan oleh peladen dan bebas dari intervensi sisi klien.
