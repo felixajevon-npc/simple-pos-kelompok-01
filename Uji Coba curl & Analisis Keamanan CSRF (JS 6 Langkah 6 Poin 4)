@@ -1,0 +1,29 @@
+A. Perintah soal: 
+Kirim request POST /pos lewat curl dengan qty bernilai 0 dan product_id yang tidak ada, lalu amati pesan error apa yang dikembalikan Laravel untuk masing-masing kasus.
+
+B. Hasil Pengujian:
+- Output request POST /pos lewat curl dengan qty bernilai 0 
+"curl -X POST http://127.0.0.1:8000/pos -H "Content-Type: application/json" -H "Accept: application/json" -d "{\"items\": [{\"product_id\": 1, \"qty\": 0}]}"
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0{
+    "message": "CSRF token mismatch.",
+    "exception": "Symfony\\Component\\HttpKernel\\Exception\\HttpException",
+    "file": "D:\\coolyeah\\semester 5\\PBL\\simple-pos-kelompok-01\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Exceptions\\Handler.php",
+    "line": 673,"
+
+- Output request POST /pos lewat curl dengan product_id yang tidak ada
+"curl -X POST http://127.0.0.1:8000/pos -H "Content-Type: application/json" -H "Accept: application/json" -d "{\"items\": [{\"product_id\": 9999, \"qty\": 1}]}"
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0{
+    "message": "CSRF token mismatch.",
+    "exception": "Symfony\\Component\\HttpKernel\\Exception\\HttpException",
+    "file": "D:\\coolyeah\\semester 5\\PBL\\simple-pos-kelompok-01\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Exceptions\\Handler.php",
+    "line": 673,"
+
+C. Kesimpulan & Analisis Pengujian:
+- Saat request POST dikirim melalui curl ke route berbasis web (routes/web.php) tanpa menyertakan token CSRF yang sah, Laravel langsung menolak request tersebut pada 
+lapisan middleware pertama dan mengembalikan pesan "CSRF token mismatch".  
+- Hal ini membuktikan bahwa pertahanan Cross-Site Request Forgery (CSRF) bawaan Laravel berjalan dengan sangat efektif untuk mencegah pengiriman data atau eksploitasi 
+ilegal dari luar aplikasi web resmi.
