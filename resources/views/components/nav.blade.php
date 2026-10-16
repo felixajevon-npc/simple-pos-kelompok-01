@@ -1,17 +1,17 @@
-<nav class="bg-slate-900 text-white px-4 py-3 flex gap-4">
+<nav class="bg-slate-900 text-white px-4 py-3 flex gap-4 items-center">
     <span class="font-semibold">Simple POS</span>
+    <a href="{{ route('pos.create') }}" class="hover:underline">Kasir</a>
+    <a href="{{ route('transactions.index') }}" class="hover:underline">Transaksi</a>
 
-    <a href="{{ route('pos.create') }}"
-       class="hover:underline px-2 py-1 rounded {{ request()->routeIs('pos.create') ? 'bg-slate-700' : '' }}">
-        Kasir
-    </a>
+    @if (auth()->user()?->isAdmin())
+        <a href="{{ route('products.index') }}" class="hover:underline">Produk</a>
+        <a href="{{ route('categories.index') }}" class="hover:underline">Kategori</a>
+    @endif
 
-    <a href="{{ route('transactions.index') }}"
-       class="hover:underline px-2 py-1 rounded {{ request()->routeIs('transactions.index') ? 'bg-slate-700' : '' }}">
-        Transaksi
-    </a>
-    <a href="{{ route('products.index') }}"
-   class="hover:underline px-2 py-1 rounded {{ request()->routeIs('products.index') ? 'bg-slate-700' : '' }}">
-    Produk
-</a>
+    <span class="ml-auto text-sm">{{ auth()->user()?->name }} ({{ auth()->user()?->role }})</span>
+
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button class="hover:underline">Keluar</button>
+    </form>
 </nav>
