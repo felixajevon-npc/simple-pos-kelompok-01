@@ -53,3 +53,35 @@ Terdapat tiga alasan teknis utama yang mendasari hal tersebut:
 Untuk menjamin integritas data finansial, aplikasi **tidak boleh** menerima input harga satuan maupun nilai `total` dari formulir sisi klien. Pada implementasi `TransactionController::store()`, formulir kasir hanya diizinkan mengirimkan identitas produk (`product_id`) dan jumlah pembelian (`qty`). 
 
 Selanjutnya, peladen secara mandiri mengambil harga resmi produk dari basis data (`Product::findOrFail($item['product_id'])`), menghitung ulang nilai `$subtotal = $product->price * $item['qty']`, serta mengakumulasikan nilai `$total` di dalam transaksi basis data (`DB::transaction()`). Pendekatan ini memastikan bahwa seluruh perhitungan harga sepenuhnya dikendalikan oleh peladen dan bebas dari intervensi sisi klien.
+
+## Skenario Uji Manual (Otorisasi & RBAC)
+
+Berikut adalah skenario pengujian manual untuk memastikan pembatasan hak akses berjalan dengan benar untuk setiap peran:
+
+### 1. Peran: Tamu (Belum Login)
+* **Langkah:** Buka browser dan langsung akses URL `/products` atau `/pos` tanpa melakukan login.
+* **Hasil yang Diharapkan:** Sistem menolak akses dan otomatis mengarahkan (redirect) pengguna ke halaman `/login`.
+
+### 2. Peran: Kasir
+* **Langkah:** 
+  1. Login menggunakan akun `kasir@pos.test`.
+  2. Buka URL `/pos` (Halaman Kasir).
+  3. Buka URL `/products` (Halaman Produk).
+* **Hasil yang Diharapkan:** 
+  * Halaman `/pos` berhasil diakses dan tampil normal.
+  * Halaman `/products` menampilkan halaman error **403 Forbidden** (Akses ditolak).
+
+### 3. Peran: Manager
+* **Langkah:**
+  1. Login menggunakan akun dengan role manager (misal: `manager@pos.test`).
+  2. Buka URL `/transactions` (Daftar Transaksi).
+  3. Buka URL `/products` (Halaman Produk).
+* **Hasil yang Diharapkan:**
+  * Halaman `/transactions` berhasil diakses dan tampil normal.
+  * Halaman `/products` menampilkan halaman error **403 Forbidden** (Akses ditolak).
+
+### 4. Peran: Admin
+* **Langkah:**
+  1. Login menggunakan akun `admin@pos.test`.
+  2. Buka URL `/products` dan `/categories`.
+* **Hasil yang Diharapkan:** Semua halaman tersebut berhasil diakses dan dirender dengan normal tanpa ada error 403.
