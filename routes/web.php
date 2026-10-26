@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,18 +22,16 @@ Route::post('/logout', [LoginController::class, 'destroy'])
     ->name('logout');
 
 Route::middleware('auth')->group(function () {
-    // POS (Bisa diakses kasir, manager, admin)
     Route::get('/pos', [TransactionController::class, 'create'])->name('pos.create');
     Route::post('/pos', [TransactionController::class, 'store'])->name('transactions.store');
 
-    // Transaksi (Hanya Admin dan Manager)
     Route::middleware('role:admin,manager')->group(function () {
         Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     });
 
-    // Produk & Kategori (Hanya Admin)
     Route::middleware('role:admin')->group(function () {
         Route::resource('categories', CategoryController::class)->except('show');
         Route::resource('products', ProductController::class)->except(['show', 'destroy']);
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     });
 });
