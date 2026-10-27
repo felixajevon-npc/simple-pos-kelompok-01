@@ -9,10 +9,19 @@
     </div>
 @endif
 
-<a href="{{ route('products.create') }}"
-   class="inline-block mb-4 bg-blue-600 text-white px-4 py-2 rounded-md">
-    Tambah Produk
-</a>
+<div class="flex items-center gap-4 mb-4">
+    <a href="{{ route('products.create') }}"
+       class="bg-blue-600 text-white px-4 py-2 rounded-md">
+        Tambah Produk
+    </a>
+
+    <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
+        @csrf
+        <input type="file" name="file" accept=".xlsx, .xls, .csv" class="block text-sm border rounded-md file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-700" required>
+        <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded-md text-sm font-medium">Import Excel</button>
+    </form>
+</div>
+
 <table class="w-full text-left border-collapse">
     <thead>
         <tr class="border-b">
