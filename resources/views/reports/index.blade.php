@@ -16,9 +16,6 @@
         <input type="date" name="to" value="{{ $to }}" class="mt-1 block border rounded-md px-3 py-2 text-sm">
     </label>
 
-    <button type="submit" class="bg-slate-900 text-white px-4 py-2 rounded-md text-sm">Filter</button> 
-        <a href="{{ route('reports.export.csv', ['from' => $from, 'to' => $to]) }}" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm">Export CSV</a>
-
     <label class="block">
         <span class="text-sm font-medium">Kategori</span>
         <select name="category_id" class="mt-1 block border rounded-md px-3 py-2 text-sm">
@@ -44,4 +41,30 @@
     <p class="text-2xl font-semibold">Rp {{ number_format($totalPenjualan) }}</p>
     <p class="text-sm text-slate-500 mt-2">{{ $jumlahTransaksi }} transaksi</p>
 </div>
+
+<section class="mt-6">
+    <h2 class="text-lg font-semibold mb-3">Produk Terlaris</h2>
+    <div class="bg-white border rounded-md overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-left">
+                <tr>
+                    <th class="px-4 py-3 font-medium">Produk</th>
+                    <th class="px-4 py-3 font-medium text-right">Jumlah Terjual</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($produkTerlaris as $produk)
+                    <tr class="border-t">
+                        <td class="px-4 py-3">{{ $produk->name }}</td>
+                        <td class="px-4 py-3 text-right">{{ number_format($produk->total_terjual) }}</td>
+                    </tr>
+                @empty
+                    <tr class="border-t">
+                        <td colspan="2" class="px-4 py-3 text-slate-500">Belum ada produk terjual pada rentang tanggal ini.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</section>
 @endsection

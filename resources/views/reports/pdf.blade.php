@@ -18,6 +18,28 @@
     <p>Total penjualan: <strong>Rp {{ number_format($totalPenjualan) }}</strong> dari {{
         $jumlahTransaksi }} transaksi</p> 
 
+    <h2>Produk Terlaris</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Produk</th>
+                <th class="right">Jumlah Terjual</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($produkTerlaris as $produk)
+            <tr>
+                <td>{{ $produk->name }}</td>
+                <td class="right">{{ number_format($produk->total_terjual) }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="2">Belum ada produk terjual pada periode ini.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+
     <p>50 transaksi terbaru pada periode ini:</p>
     <table>
         <thead>
