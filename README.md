@@ -85,3 +85,17 @@ Berikut adalah skenario pengujian manual untuk memastikan pembatasan hak akses b
   1. Login menggunakan akun `admin@pos.test`.
   2. Buka URL `/products` dan `/categories`.
 * **Hasil yang Diharapkan:** Semua halaman tersebut berhasil diakses dan dirender dengan normal tanpa ada error 403.
+
+---
+
+## Analisis Pengolahan Data & Queue (Pertemuan 9)
+
+### 1. Pemilihan Format Export untuk 100.000 Transaksi (Diskusi Langkah 6)
+Untuk laporan dengan skala **100.000 transaksi**, format yang paling tepat dipilih adalah **CSV (Streaming)** menggunakan `lazyById()` dan `streamDownload()`[cite: 5, 15].
+* **Alasan:** Export CSV menggunakan mekanisme *streaming* yang mengalirkan data baris demi baris langsung ke *output buffer* browser sementara `lazyById()` mengambil data dari database per *chunk* kecil, sehingga pemakaian memori (RAM) server tetap datar/konstan[cite: 4, 5]. Sebaliknya, DomPDF memuat seluruh dokumen HTML ke dalam memori sekaligus sehingga sangat berisiko menabrak batas `memory_limit` PHP pada puluhan ribu baris[cite: 8, 11], sedangkan pembentukan struktur XML/ZIP pada Excel (`.xlsx`) tetap membutuhkan beban komputasi yang jauh lebih berat dibandingkan teks polos CSV[cite: 8].
+
+### 2. Identifikasi Proses Lain di Simple POS yang Layak Dipindah ke Queued Job (Langkah 10 - Poin 5)
+Proses lain di Simple POS yang sangat layak dipindahkan ke *Queued Job* adalah **Pengiriman Struk Transaksi Digital (via Email / WhatsApp Gateway) serta Pencatatan Log Audit Eksternal** sesaat setelah kasir menyelesaikan transaksi di `TransactionController@store`[cite: 4, 23].
+* **Alasan:**
+  1. **Waktu Respons Kasir Tetap Instan (*Non-Blocking UI*):** Kasir membutuhkan respons halaman yang cepat setelah menekan tombol simpan transaksi agar dapat segera melayani antrean pembeli berikutnya. Menghubungi server SMTP email atau API pihak ketiga secara langsung (*synchronous*) dapat menahan proses HTTP *request* selama beberapa detik.
+  2. **Ketahanan terhadap Kegagalan Jaringan (*Fault Tolerance* & *Retry Mechanism*):** Apabila layanan email atau jaringan eksternal sedang *down*, proses penyimpanan transaksi utama di database kasir tidak boleh ikut gagal. Dengan memindahkannya ke *Queued Job* (lengkap dengan konfigurasi `$tries = 3` dan `$backoff = [10, 60]`), pembuatan nota digital akan dikerjakan di *background* oleh *queue worker* dan otomatis dicoba ulang jika terjadi kegagalan sementara[cite: 20, 22].
