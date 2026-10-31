@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exports\SalesReportExport;
 use App\Jobs\ProcessProductImport;
+use App\Models\Category;
+use App\Models\Product;
 use App\Models\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,6 +27,18 @@ class ReportController extends Controller
         return view('reports.index', [
             'totalPenjualan' => $query->sum('total'),
             'jumlahTransaksi' => $query->count(),
+            'categories' => Category::query()->orderBy('name')->get(),
+            'categoryId' => $request->input('category_id'),
+            'produkTerlaris' => Product::query()
+                ->select('products.id', 'products.name')
+                ->join('transaction_details', 'products.id', '=', 'transaction_details.product_id')
+                ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
+                ->whereBetween('transactions.created_at', [$from, $to])
+                ->selectRaw('SUM(transaction_details.qty) as total_terjual')
+                ->groupBy('products.id', 'products.name')
+                ->orderByDesc('total_terjual')
+                ->limit(5)
+                ->get(),
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
         ]);
@@ -65,8 +79,18 @@ class ReportController extends Controller
             'totalPenjualan' => $this->filteredQuery($from, $to)->sum('total'),
             'jumlahTransaksi' => $this->filteredQuery($from, $to)->count(),
             'transactions' => $this->filteredQuery($from, $to)->latest()->limit(50)->get(),
+            'produkTerlaris' => Product::query()
+                ->select('products.id', 'products.name')
+                ->join('transaction_details', 'products.id', '=', 'transaction_details.product_id')
+                ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
+                ->whereBetween('transactions.created_at', [$from, $to])
+                ->selectRaw('SUM(transaction_details.qty) as total_terjual')
+                ->groupBy('products.id', 'products.name')
+                ->orderByDesc('total_terjual')
+                ->limit(5)
+                ->get(),
             'from' => $from->toDateString(),
-            'to' => $from->toDateString(),
+            'to' => $to->toDateString(),
         ]);
 
         return $pdf->download('laporan-penjualan.pdf');
