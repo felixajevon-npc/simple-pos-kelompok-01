@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\SalesReportExport;
 use App\Jobs\ProcessProductImport;
 use App\Models\Category;
+use App\Models\ImportError;
 use App\Models\Product;
 use App\Models\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -98,7 +99,9 @@ class ReportController extends Controller
 
     public function importForm(): View
     {
-        return view('reports.import');
+        $importErrors = ImportError::orderBy('row_number', 'asc')->get();
+
+        return view('reports.import', compact('importErrors'));
     }
 
     public function import(Request $request): RedirectResponse
@@ -106,6 +109,8 @@ class ReportController extends Controller
         $request->validate([
             'csv' => ['required', 'file', 'mimes:csv,txt'],
         ]);
+
+        ImportError::truncate();
 
         $path = $request->file('csv')->store('imports');
 
