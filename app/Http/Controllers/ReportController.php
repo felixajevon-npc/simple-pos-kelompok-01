@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\SalesReportExport;
 use App\Jobs\ProcessProductImport;
 use App\Models\Category;
+use App\Models\ImportError;
 use App\Models\Product;
 use App\Models\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -98,7 +100,11 @@ class ReportController extends Controller
 
     public function importForm(): View
     {
-        return view('reports.import');
+        $importErrors = Schema::hasTable('import_errors')
+            ? ImportError::orderBy('row_number', 'asc')->get()
+            : collect();
+
+        return view('reports.import', compact('importErrors'));
     }
 
     public function import(Request $request): RedirectResponse
@@ -106,6 +112,10 @@ class ReportController extends Controller
         $request->validate([
             'csv' => ['required', 'file', 'mimes:csv,txt'],
         ]);
+
+        if (Schema::hasTable('import_errors')) {
+            ImportError::truncate();
+        }
 
         $path = $request->file('csv')->store('imports');
 
