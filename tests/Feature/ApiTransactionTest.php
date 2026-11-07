@@ -17,23 +17,27 @@ class ApiTransactionTest extends TestCase
     private function payload(): array
     {
         $category = Category::forceCreate(['name' => 'Minuman']);
-        $product = Product::create(['category_id' => $category->id, 'name' => 'Kopi',
-        'price' => 15000, 'stock' => 10]);
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Kopi',
+            'price' => 15000,
+            'stock' => 10
+        ]);
 
         return ['items' => [['product_id' => $product->id, 'qty' => 2]]];
     }
 
     public function test_guest_cannot_create_transaction(): void
     {
-        $this->postJson('/api/transactions', $this->payload())->assertUnauthorized();
+        $this->postJson('/api/v1/transactions', $this->payload())->assertUnauthorized();
         // 401
     }
 
     public function test_token_without_ability_is_forbidden(): void
     {
         Sanctum::actingAs(User::factory()->create(), ['products:read']);
-    
-        $this->postJson('/api/transactions', $this->payload(), ['Idempotency-Key' => 'k1']) 
+
+        $this->postJson('/api/v1/transactions', $this->payload(), ['Idempotency-Key' => 'k1'])
             ->assertForbidden();
         // 403
     }
@@ -41,10 +45,10 @@ class ApiTransactionTest extends TestCase
     public function test_invalid_items_are_rejected(): void
     {
         Sanctum::actingAs(User::factory()->create(), ['transactions:create']);
-        
-        $this->postJson('/api/transactions', ['items' => [['product_id' => 99999, 'qty' => 1]]], ['Idempotency-Key' => 'k2'])
+
+        $this->postJson('/api/v1/transactions', ['items' => [['product_id' => 99999, 'qty' => 1]]], ['Idempotency-Key' => 'k2'])
             ->assertUnprocessable()
-        // 422
+            // 422
             ->assertJsonValidationErrors('items.0.product_id');
     }
 
@@ -54,16 +58,16 @@ class ApiTransactionTest extends TestCase
         $payload = $this->payload();
         $headers = ['Idempotency-Key' => 'k3'];
 
-        $first = $this->postJson('/api/transactions', $payload, $headers)
+        $first = $this->postJson('/api/v1/transactions', $payload, $headers)
             ->assertCreated()
-        // 201 
+            // 201 
             ->assertJsonPath('data.total', 30000);
-        
-        $this->postJson('/api/transactions', $payload, $headers)
+
+        $this->postJson('/api/v1/transactions', $payload, $headers)
             ->assertCreated()
             ->assertHeader('Idempotent-Replayed', 'true')
             ->assertJsonPath('data.id', $first->json('data.id'));
-        
+
         $this->assertDatabaseCount('transactions', 1);
     }
 
@@ -73,11 +77,11 @@ class ApiTransactionTest extends TestCase
         $transaction = Transaction::create(['user_id' => $owner->id, 'total' => 1000]);
 
         Sanctum::actingAs(User::factory()->create(), ['transactions:read']);
-        $this->getJson("/api/transactions/{$transaction->id}")->assertForbidden();
+        $this->getJson("/api/v1/transactions/{$transaction->id}")->assertForbidden();
         // 403
 
         Sanctum::actingAs($owner, ['transactions:read']);
-        $this->getJson("/api/transactions/{$transaction->id}")
+        $this->getJson("/api/v1/transactions/{$transaction->id}")
             ->assertOk()
             ->assertJsonPath('data.id', $transaction->id);
     }
