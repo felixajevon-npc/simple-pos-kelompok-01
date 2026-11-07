@@ -128,3 +128,9 @@ components:
     bearerAuth:
       type: http
       scheme: bearer
+
+# Perbandingan Pengalaman Uji API (Postman vs cURL):
+# Menguji API menggunakan Postman jauh lebih mudah dan terstruktur dibandingkan menggunakan cURL di terminal. 
+# Postman menyediakan antarmuka visual (GUI) yang memudahkan kita memasukkan Bearer Token, query parameters, dan Custom Headers (seperti Idempotency-Key) 
+# ke dalam kolom-kolom yang sudah disediakan tanpa takut salah ketik (typo) sintaks command line. Selain itu, Postman secara otomatis memformat balasan (response) 
+# ke dalam bentuk JSON yang rapi dan mudah dibaca, berbeda dengan cURL yang menampilkan teks menumpuk di terminal.
