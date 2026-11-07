@@ -36,9 +36,34 @@ paths:
       summary: Ambil daftar produk
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: per_page
+          schema:
+            type: integer 
+            minimum: 1
+            maximum: 100
+          description: Jumlah produk per halaman untuk paginasi (default 15)
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: ['name', '-name', 'price', '-price']
+          description: Pengurutan data produk berdasarkan nama atau harga (tanda minus untuk descending)
+        - in: query
+          name: q
+          schema:
+            type: string
+            minLength: 2
+          description: Pencarian berdasarkan nama produk
+        - in: query
+          name: category_id
+          schema:
+            type: integer
+          description: Filter produk berdasarkan ID kategori
       responses:
         '200':
-          description: Daftar produk
+          description: Daftar produk (berpaginasi)
           content:
             application/json:
               schema:
@@ -53,8 +78,16 @@ paths:
                         name: { type: string }
                         price: { type: integer }
                         category: { type: string }
+                  links:
+                    type: object
+                    description: Link navigasi paginasi (first, last, prev, next)
+                  meta:
+                    type: object
+                    description: Meta informasi paginasi (current_page, per_page, total, dll)
         '401':
           description: Token tidak ada atau tidak valid
+        '422':
+          description: Input tidak valid (misalnya per_page melebihi batas)
   /api/transactions:
     post:
       summary: Buat transaksi baru
